@@ -174,7 +174,8 @@ function removeProperty($oid, $type, $property){
 
 function addRelation($oid, $type, $other_oid){
 	$Object = new RDFObject( NULL, $this->dbConn, $oid, 0);
-	$Object->addRelation($other_oid, $type, new RDFObject(NULL, $this->dbConn, $other_oid,0));
+	$newObject = new RDFObject(NULL, $this->dbConn, $other_oid,0);
+	$Object->addRelation($other_oid, $type, $newObject);
 	$Object->write_to_db();
 	
 	}

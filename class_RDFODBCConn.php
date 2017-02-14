@@ -8,7 +8,7 @@ private $error;
 
 function __construct(){
 		
-		$conn = odbc_connect('VOS', 'myuser', 'mypasswort');
+		$conn = odbc_connect('VOS', 'dba', 'root');
 		
 		if(!odbc_error($conn)){
 				throw new Exception("ODBC Connection Fehlgeschlagen. Code: ".odbc_error()." 
@@ -276,7 +276,8 @@ function searchObjects($searchString, $type=NULL){
 					if(!(strpos($row['f'], "oid")===false) && $row['g'] != "ca:hasOid"){
 							//echo "bin in beziehungsdetection<br>";
 							$extractedRelOid=$this->extractOid($row['f']);
-							$currentObj->addExistingRelation($extractedRelOid, $row['g'], new RDFObject(null, $this->dbConn));
+							$newObject = new RDFObject(null, $this->dbConn);
+							$currentObj->addExistingRelation($extractedRelOid, $row['g'], $newObject);
 							$relArray=array('from' => $currentExtractedOid, 'to' =>$extractedRelOid, 'type' => $row['g'] );
 							$edges[]=$relArray;
 						}
