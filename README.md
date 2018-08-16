@@ -2,10 +2,8 @@ citeapp
 =======
 
 An app to save and search citations and to display them
-
-
-
 Docker:
+ ```
 docker run -d -p 8080:80 \
  -e XDEBUG_CONFIG="$(hostname -I | awk '{print $1}')" \
  -e LOG_STDOUT=true \
@@ -14,3 +12,9 @@ docker run -d -p 8080:80 \
  -v $(pwd):/var/www/html \
  --name citeapp \
  citeapp 
+```
+
+docker-compose:
+ ```
+docker-compose up 
+```

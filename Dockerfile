@@ -8,9 +8,11 @@ Version="1.0"
 #RUN sed -i 's/archive.ubuntu/old-releases.ubuntu/' /etc/apt/sources.list
 RUN apt-get update
 RUN apt-get install -y php-zip php-mbstring dos2unix php-xdebug php-odbc
+RUN apt-get install -y odbcinst
+RUN apt-get -y install libvirtodbc0
 
 COPY docker/entrypoint.sh /usr/local/bin
-
+COPY docker/odbc.ini /etc/odbc.ini
 RUN dos2unix /usr/local/bin/entrypoint.sh
 
 VOLUME /var/www/html
