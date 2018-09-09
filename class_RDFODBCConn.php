@@ -7,10 +7,10 @@ private $error;
 
 
 function __construct(){
-		
-		$conn = odbc_connect('VOS', 'dba', 'root');
-		
-		if(!odbc_error($conn)){
+
+    $conn = odbc_connect('VOS', 'dba', 'dba');
+
+    if ($this->isODBCError($conn)) {
 				throw new Exception("ODBC Connection Fehlgeschlagen. Code: ".odbc_error()." 
 				Message: ".odbc_errormsg()." File: ".__FILE__." Line: ".__LINE__, 0);
 			
@@ -39,7 +39,7 @@ function getOid(){
 		
 		$sparql='INSERT INTO <'.__MYURL__.'> {<'.__MYURL__.'>  <'.__MYURL__.'/voc.html#locked>  "1" } ';
 		$result = odbc_exec($this->conn, 'CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
-		if(!odbc_error($this->conn) ){
+    if ($this->isODBCError($this->conn)) {
 				throw new Exception("ODBC Operation Fehlgeschlagen. Code: ".odbc_error($this->conn)." 
 				Message: ".odbc_errormsg($this->conn)." File: ".__FILE__." Line: ".__LINE__, 1);
 			
@@ -48,7 +48,7 @@ function getOid(){
 	
 		$sparql='SELECT ?c FROM <'.__MYURL__.'> WHERE {<'.__MYURL__.'>  <'.__MYURL__.'/voc.html#currentOid>  ?c } ';
 		$result = odbc_exec($this->conn, 'CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
-		if(!odbc_error($this->conn) ){
+    if ($this->isODBCError($this->conn)) {
 				throw new Exception("ODBC Operation Fehlgeschlagen. Code: ".odbc_error($this->conn)." 
 				Message: ".odbc_errormsg($this->conn)." File: ".__FILE__." Line: ".__LINE__, 1);
 			
@@ -63,7 +63,7 @@ function getOid(){
 
 		DELETE FROM GRAPH <'.__MYURL__.'> {<'.__MYURL__.'>  <'.__MYURL__.'/voc.html#locked>  "1" }';
 		$result = odbc_exec($this->conn, 'CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
-			if(!odbc_error($this->conn) ){
+    if ($this->isODBCError($this->conn)) {
 				throw new Exception("ODBC Operation Fehlgeschlagen. Code: ".odbc_error($this->conn)." 
 				Message: ".odbc_errormsg($this->conn)." File: ".__FILE__." Line: ".__LINE__, 1);
 			
@@ -78,7 +78,7 @@ function getObject($oid, $recLevel=0){
 	$sparql='select ?a ?b ?c FROM <'.__MYURL__.'> WHERE{ {<'.__MYURL__.'/instances.php?oid='.$oid.'> ?b ?c} UNION{ ?a ?b <'.__MYURL__.'/instances.php?oid='.$oid.'>}}';
 	
 			$result = odbc_exec($this->conn, 'CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
-			if(!odbc_error($this->conn) ){
+    if ($this->isODBCError($this->conn)) {
 			
 				throw new Exception("ODBC Operation Fehlgeschlagen. Code: ".odbc_error($this->conn)." 
 				Message: ".odbc_errormsg($this->conn)." File: ".__FILE__." Line: ".__LINE__, 1);
@@ -170,7 +170,7 @@ function writeInstance($object){
 		<'.__MYURL__.'/instances.php?oid='.$currentOid.'>  <rdf:instanceOf>  "'.$object->getType().'" }';
 
 		$result = odbc_exec($this->conn, 'CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
-		if(!odbc_error($this->conn) ){
+    if ($this->isODBCError($this->conn)) {
 				throw new Exception("ODBC Operation Fehlgeschlagen. Code: ".odbc_error($this->conn)." 
 				Message: ".odbc_errormsg($this->conn)." File: ".__FILE__." Line: ".__LINE__, 1);
 			
@@ -188,7 +188,7 @@ function addProp($oid, $type,$addPropertie){
 		{<'.__MYURL__.'/instances.php?oid='.$oid.'>  <'.$type.'>  "'.$addPropertie.'" }';
 
 		$result = odbc_exec($this->conn, 'CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
-		if(!odbc_error($this->conn) ){
+    if ($this->isODBCError($this->conn)) {
 				throw new Exception("ODBC Operation Fehlgeschlagen. Code: ".odbc_error($this->conn)." 
 				Message: ".odbc_errormsg($this->conn)." File: ".__FILE__." Line: ".__LINE__, 1);
 			
@@ -199,7 +199,7 @@ function addRel($from_oid, $type, $to_oid ){
 		$sparql = 'INSERT INTO <'.__MYURL__.'> 
 		{<'.__MYURL__.'/instances.php?oid='.$from_oid.'>  <'.$type.'>  <'.__MYURL__.'/instances.php?oid='.$to_oid.'>  }';
 		$result = odbc_exec($this->conn, 'CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
-		if(!odbc_error($this->conn) ){
+    if ($this->isODBCError($this->conn)) {
 				throw new Exception("ODBC Operation Fehlgeschlagen. Code: ".odbc_error($this->conn)." 
 				Message: ".odbc_errormsg($this->conn)." File: ".__FILE__." Line: ".__LINE__, 1);
 			
@@ -234,7 +234,7 @@ function searchObjects($searchString, $type=NULL){
 		}
 	
 	$result = odbc_exec($this->conn, 'CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
-		if(!odbc_error($this->conn)){
+    if ($this->isODBCError($this->conn)) {
 				echo odbc_errormsg($this->conn);
 				throw new Exception("ODBC Operation Fehlgeschlagen. Code: ".odbc_error($this->conn)." 
 				Message: ".odbc_errormsg($this->conn)." File: ".__FILE__." Line: ".__LINE__ , 1);
@@ -322,8 +322,8 @@ function searchObjects($searchString, $type=NULL){
 function getClasses($searchString){
 		$sparql = 'SELECT DISTINCT ?c FROM <'.__MYURL__.'> WHERE {?a <rdf:instanceOf> ?c.FILTER(?c LIKE "%'.$searchString.'%")}';
 		$result = odbc_exec($this->conn, 'CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
-		
-		if(!odbc_error($this->conn) ){
+
+    if ($this->isODBCError($this->conn)) {
 			throw new Exception("ODBC Operation Fehlgeschlagen. Code: ".odbc_error($this->conn)." 
 			Message: ".odbc_errormsg($this->conn)." File: ".__FILE__." Line: ".__LINE__, 1);
 		
@@ -360,8 +360,8 @@ function getClasses($searchString){
 function getAllPropertyTypes($searchString, $type = NULL){
 		$sparql = 'SELECT DISTINCT ?c FROM <'.__MYURL__.'> WHERE {?a ?c ?b.FILTER( (?a LIKE "%oid%") && (?c LIKE "http://citeapp.ch/voc.html#%'.$searchString.'%" || ?c LIKE "%'.$searchString.'%") && !(?b LIKE "%oid%")) }';
 		$result = odbc_exec($this->conn, 'CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
-		
-		if(!odbc_error($this->conn) ){
+
+    if ($this->isODBCError($this->conn)) {
 			throw new Exception("ODBC Operation Fehlgeschlagen. Code: ".odbc_error($this->conn)." 
 			Message: ".odbc_errormsg($this->conn)." File: ".__FILE__." Line: ".__LINE__, 1);
 		
@@ -403,7 +403,7 @@ function getAllRelationTypes($searchString, $type = NULL){
 	$sparql = 'SELECT DISTINCT ?c FROM <'.__MYURL__.'> WHERE {?a ?c ?b.FILTER( (?a LIKE "%oid%") && (?c LIKE "%'.$searchString.'%") && (?b LIKE "%oid%")) }';
 		$result = odbc_exec($this->conn, 'CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
 		//echo $sparql;
-		if(!odbc_error($this->conn) ){
+    if ($this->isODBCError($this->conn)) {
 			throw new Exception("ODBC Operation Fehlgeschlagen. Code: ".odbc_error($this->conn)." 
 			Message: ".odbc_errormsg($this->conn)." File: ".__FILE__." Line: ".__LINE__, 1);
 		
@@ -439,7 +439,7 @@ function getAllRelationTypes($searchString, $type = NULL){
 function  deleteProp($oid, $RemovePropertie, $value){
 		$sparql = 'DELETE FROM <'.__MYURL__.'>  { <'.__MYURL__.'/instances.php?oid='.$oid.'> <'.$RemovePropertie.'> "'.$value.'" } ';
 		$result = odbc_exec($this->conn, 'CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
-		if(!odbc_error($this->conn) ){
+    if ($this->isODBCError($this->conn)) {
 			throw new Exception("ODBC Operation Fehlgeschlagen. Code: ".odbc_error($this->conn)." 
 			Message: ".odbc_errormsg($this->conn)." File: ".__FILE__." Line: ".__LINE__, 1);
 		
@@ -450,7 +450,7 @@ function deleteRel($oid, $type, $other_oid ){
 		$sparql = 'DELETE FROM <'.__MYURL__.'>  { <'.__MYURL__.'/instances.php?oid='.$oid.'> <'.$type.'> <'.__MYURL__.'/instances.php?oid='.$other_oid.'> } ';
 		
 		$result = odbc_exec($this->conn, 'CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
-		if(!odbc_error($this->conn) ){
+    if ($this->isODBCError($this->conn)) {
 			throw new Exception("ODBC Operation Fehlgeschlagen. Code: ".odbc_error($this->conn)." 
 			Message: ".odbc_errormsg($this->conn)." File: ".__FILE__." Line: ".__LINE__, 1);
 		
@@ -468,13 +468,22 @@ function deleteObject($oid){
 		';
 		
 		$result = odbc_exec($this->conn, 'CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
-			if(!odbc_error($this->conn) ){
+    if ($this->isODBCError($this->conn)) {
 				throw new Exception("ODBC Operation Fehlgeschlagen. Code: ".odbc_error($this->conn)." 
 				Message: ".odbc_errormsg($this->conn)." File: ".__FILE__." Line: ".__LINE__, 1);
 			
 			}	
 	
 	}
+
+    /**
+     * @param $conn
+     * @return bool
+     */
+    private function isODBCError ($conn)
+    {
+        return odbc_error($conn) != "";
+    }
 
 }
 
