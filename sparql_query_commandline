@@ -1,0 +1,2 @@
+CALL DB.DBA.SPARQL_EVAL('SELECT * FROM <http://citeapp.ch> WHERE {?a ?b ?c}', NULL, 0);
+SPARQL SELECT * FROM <http://citeapp.ch> WHERE {?a ?b ?c};
