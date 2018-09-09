@@ -396,7 +396,7 @@
 							success: function(response){
 								
 								var newNodes = [];
-								var countNodes = nodes.length
+                                var countNodes = nodes.length;
 					
 								for(var i in response.nodes){
 									

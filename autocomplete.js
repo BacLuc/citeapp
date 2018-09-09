@@ -172,109 +172,106 @@ _source: function( request, response ) {
 	this.element.children( "option" ).map(function() {
 			$(this).remove();
 		});
-	var element= this.element;
-	
-	if(type == 'relation'){
-			var form_data = {
-				action : 'getAllRelationTypes',
-				searchstring : request.term
-				 
-				};
-			}
-	
-	else if(type == 'type'){
-			var form_data = {
-				action : 'getClasses',
-				searchstring : request.term
-				 
-				};
-			}
-	else if(type == 'property'){
-			var form_data = {
-				action : 'getAllPropertyTypes',
-				searchstring : request.term
-				 
-				};
-			}
-	else if(type == 'object'){
-			var form_data = {
-				action : 'searchObjectsForSearch',
-				searchstring : request.term
-				 
-				};
-			}
-		$.ajax({
-			type: "POST",
-			url: "ajax_server.php",
-			data: form_data,
-			dataType: "json",
-			success: function(answer){
-				
-				if(answer.check == "suc"){
-					var appendedtest = '';
-					for(var i in answer.result){
-							if(type=='object'){
-									var text = "<option value='"+answer.result[i].levenprop+"' oid="+i+" title='";
-									for( var j in answer.result[i].properties){
-											text += answer.result[i].properties[j].label+" :"+ answer.result[i].properties[j].value+ " ,";
-										
-										}
-									text += "'>"+answer.result[i].levenprop+"</option>";
-								//console.log(id);
-									$('#'+id).append(text);
-								}
-							else{
-								var text="<option value='"+answer.result[i].class+"'>"+answer.result[i].label+"</option>";
-								//console.log(answer.result[i].class);
-								
-								$('#'+id).append(text);
-							
-							}
-							//console.log($('#'+id).html());
-							
-							//console.log($('#'+id).html());
-							
-						
-					}
-					//console.log(appendedtest);
-					//console.log(id);
-					if(propId != '' && id.indexOf('oid') > -1){
-									
-									if(type == 'object'){
-											$('#'+id).append("<option class=''  nodeId='"+nodeId+"' propId='"+propId+"' value='"+graph.nodes[nodeId].properties[propId].value+"'>"+graph.nodes[nodeId].properties[propId].value+"</option>");
-										
-										
-										}
-									else if(type == 'property'){
-											$('#'+id).append("<option  nodeId='"+nodeId+"' propId='"+propId+"' value='"+graph.nodes[nodeId].properties[propId].value+"'>"+graph.nodes[nodeId].properties[propId].label+"</option>");
-											
-										
-										}
-									var e = document.getElementById(id);
-									e.selectedIndex=e.options.length-1;
-								
-								}
-					
-				
-					
-					
-			
-				var matcher = new RegExp( $.ui.autocomplete.escapeRegex(request.term), "i" );
-				var options = element.children( "option" ).map(function() {
-					var text = $( this ).text();
-					if ( this.value && ( !request.term || matcher.test(text) ) )
-						return {
-							label: text,
-							value: text,
-							option: this
-						};
-				});
-	
-				response( options);
-					
-				}
-			}
-		});
+    var element = this.element;
+
+    if (type == 'relation') {
+        var form_data = {
+            action: 'getAllRelationTypes',
+            searchstring: request.term
+
+        };
+    }
+
+    else if (type == 'type') {
+        var form_data = {
+            action: 'getClasses',
+            searchstring: request.term
+
+        };
+    }
+    else if (type == 'property') {
+        var form_data = {
+            action: 'getAllPropertyTypes',
+            searchstring: request.term
+
+        };
+    }
+    else if (type == 'object') {
+        var form_data = {
+            action: 'searchObjectsForSearch',
+            searchstring: request.term
+
+        };
+    }
+    $.ajax({
+        type: "POST",
+        url: "ajax_server.php",
+        data: form_data,
+        dataType: "json",
+        success: function (answer) {
+
+            if (answer.check == "suc") {
+                var appendedtest = '';
+                for (var i in answer.result) {
+                    if (type == 'object') {
+                        var text = "<option value='" + answer.result[i].levenprop + "' oid=" + i + " title='";
+                        for (var j in answer.result[i].properties) {
+                            text += answer.result[i].properties[j].label + " :" + answer.result[i].properties[j].value + " ,";
+
+                        }
+                        text += "'>" + answer.result[i].levenprop + "</option>";
+                        //console.log(id);
+                        $('#' + id).append(text);
+                    }
+                    else {
+                        var text = "<option value='" + answer.result[i].class + "'>" + answer.result[i].label + "</option>";
+                        //console.log(answer.result[i].class);
+
+                        $('#' + id).append(text);
+
+                    }
+                    //console.log($('#'+id).html());
+
+                    //console.log($('#'+id).html());
+
+
+                }
+                //console.log(appendedtest);
+                //console.log(id);
+                if (propId != '' && id.indexOf('oid') > -1) {
+
+                    if (type == 'object') {
+                        $('#' + id).append("<option class=''  nodeId='" + nodeId + "' propId='" + propId + "' value='" + graph.nodes[nodeId].properties[propId].value + "'>" + graph.nodes[nodeId].properties[propId].value + "</option>");
+
+
+                    }
+                    else if (type == 'property') {
+                        $('#' + id).append("<option  nodeId='" + nodeId + "' propId='" + propId + "' value='" + graph.nodes[nodeId].properties[propId].value + "'>" + graph.nodes[nodeId].properties[propId].label + "</option>");
+
+
+                    }
+                    var e = document.getElementById(id);
+                    e.selectedIndex = e.options.length - 1;
+
+                }
+
+
+                var matcher = new RegExp($.ui.autocomplete.escapeRegex(request.term), "i");
+                var options = element.children("option").map(function () {
+                    var text = $(this).text();
+                    if (this.value && (!request.term || matcher.test(text)))
+                        return {
+                            label: text,
+                            value: text,
+                            option: this
+                        };
+                });
+
+                response(options);
+
+            }
+        }
+    });
 },
 _removeIfInvalid: function( event, ui ) {
 	

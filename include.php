@@ -3,7 +3,6 @@ define("__MYURL__", "http://citeapp.ch");
 define("__SPARQL_ENDPOINT__", "http://localhost:8890/sparql");
 
 
-
 //include( "sparqllib.php" );
 //include("class_RDFDbConn.php");
 include("class_RDFODBCConn.php");
