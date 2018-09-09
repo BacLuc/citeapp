@@ -17,4 +17,6 @@ docker run -d -p 8080:80 \
 docker-compose:
  ```
 docker-compose up 
+
+cat docker-compose.yml | sed -e "s=HOSTIP=$(hostname -I | awk '{print $1}')=g" | sed -e "s=PWD=$(pwd)=g" | docker-compose --file - up
 ```
