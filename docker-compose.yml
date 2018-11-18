@@ -9,7 +9,7 @@ web:
       - "./:/var/www/html"
       ports:
         - "8080:80"
-db:
+virtuoso:
   image: tenforce/virtuoso:1.3.1-virtuoso7.2.2
   environment:
     SPARQL_UPDATE: "true"
@@ -19,3 +19,15 @@ db:
   ports:
     - "8890:8890"
     - "1111:1111"
+
+
+neo4j:
+  image: neo4j:3.4
+  environment:
+    NEO4J_AUTH: "neo4j/password"
+  volumes:
+  - "./data/neo4j:/data"
+  ports:
+  - "7474:7474"
+  #for websocket of neo4j WebUi
+  - "7687:7687"
