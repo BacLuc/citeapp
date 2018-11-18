@@ -28,7 +28,7 @@ class RDFODBCConn
         odbc_close_all();
     }
 
-    function getOid ()
+    private function getOid ()
     {
 
         $count = 5;
@@ -81,7 +81,7 @@ class RDFODBCConn
 
     }
 
-    function getObject ($oid, $recLevel = 0)
+    public function getObject ($oid, $recLevel = 0)
     {
 
         $sparql = 'select ?a ?b ?c FROM <' . __MYURL__ . '> WHERE{ {<' . __MYURL__ . '/instances.php?oid=' . $oid
@@ -157,7 +157,7 @@ class RDFODBCConn
 
     }
 
-    function extractOid ($urlString)
+    private function extractOid ($urlString)
     {
 
         $firststring = explode("=", $urlString);
@@ -175,7 +175,7 @@ class RDFODBCConn
     }
 
 
-    function writeInstance ($object)
+    public function writeInstance ($object)
     {
         $currentOid = $this->getOid();
         $sparql = 'INSERT INTO <' . __MYURL__ . '> 
@@ -193,7 +193,7 @@ class RDFODBCConn
 
     }
 
-    function addProp ($oid, $type, $addPropertie)
+    public function addProp ($oid, $type, $addPropertie)
     {
         $addPropertie = str_replace("'", "\'", $addPropertie);
         $addPropertie = str_replace('"', "\'", $addPropertie);
@@ -210,7 +210,7 @@ class RDFODBCConn
         }
     }
 
-    function addRel ($from_oid, $type, $to_oid)
+    public function addRel ($from_oid, $type, $to_oid)
     {
 
         $sparql = 'INSERT INTO <' . __MYURL__ . '> 
@@ -224,7 +224,7 @@ class RDFODBCConn
         }
     }
 
-    function searchObjects ($searchString, $type = NULL)
+    public function searchObjects ($searchString, $type = NULL)
     {
 
         $returnArray = array( 'objects' => [], 'edges' => [] );
@@ -333,7 +333,7 @@ class RDFODBCConn
     }
 
 
-    function getClasses ($searchString)
+    public function getClasses ($searchString)
     {
         $sparql = 'SELECT DISTINCT ?c FROM <' . __MYURL__ . '> WHERE {?a <rdf:instanceOf> ?c.FILTER(?c LIKE "%'
                   . $searchString . '%")}';
@@ -374,7 +374,7 @@ class RDFODBCConn
 
     }
 
-    function getAllPropertyTypes ($searchString, $type = NULL)
+    public function getAllPropertyTypes ($searchString, $type = NULL)
     {
         $sparql = 'SELECT DISTINCT ?c FROM <' . __MYURL__
                   . '> WHERE {?a ?c ?b.FILTER( (?a LIKE "%oid%") && (?c LIKE "http://citeapp.ch/voc.html#%'
@@ -421,7 +421,7 @@ class RDFODBCConn
 
     }
 
-    function getAllRelationTypes ($searchString, $type = NULL)
+    public function getAllRelationTypes ($searchString, $type = NULL)
     {
 
         $sparql = 'SELECT DISTINCT ?c FROM <' . __MYURL__ . '> WHERE {?a ?c ?b.FILTER( (?a LIKE "%oid%") && (?c LIKE "%'
@@ -463,7 +463,7 @@ class RDFODBCConn
 
     }
 
-    function deleteProp ($oid, $RemovePropertie, $value)
+    public function deleteProp ($oid, $RemovePropertie, $value)
     {
         $sparql =
             'DELETE FROM <' . __MYURL__ . '>  { <' . __MYURL__ . '/instances.php?oid=' . $oid . '> <' . $RemovePropertie
@@ -477,7 +477,7 @@ class RDFODBCConn
 
     }
 
-    function deleteRel ($oid, $type, $other_oid)
+    public function deleteRel ($oid, $type, $other_oid)
     {
         $sparql =
             'DELETE FROM <' . __MYURL__ . '>  { <' . __MYURL__ . '/instances.php?oid=' . $oid . '> <' . $type . '> <'
@@ -491,7 +491,7 @@ class RDFODBCConn
         }
     }
 
-    function deleteObject ($oid)
+    public function deleteObject ($oid)
     {
         $sparql = '
 		DELETE FROM <' . __MYURL__ . '>  { ?a ?b ?c } 
