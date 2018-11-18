@@ -4,6 +4,9 @@ ini_set('display_errors', '1');
 
 class RDFMediator
 {
+    /**
+     * @var $resultList RDFObject[]
+     */
     public $resultList;
     public $edges;
     public $dbConn;
@@ -12,7 +15,7 @@ class RDFMediator
     public $edgehashlist;
 
 
-    function __construct (&$dbConn)
+    function __construct (GraphDBProtocol &$dbConn)
     {
         session_start();
         $this->dbConn = $dbConn;
@@ -95,7 +98,7 @@ class RDFMediator
 
     }
 
-    function fillObjectArrayRecursive (&$object)
+    function fillObjectArrayRecursive (RDFObject &$object)
     {
 
         //echo "printing object with oid".$object->getOid()."<br>";

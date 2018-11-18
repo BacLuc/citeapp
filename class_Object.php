@@ -13,12 +13,15 @@ class RDFObject
     public $relations;// [[oid => [type =>&object]],[]...]
     public $newRelations;
     public $removeRelations;
+    /**
+     * @var GraphDBProtocol
+     */
     public $dbConn;
     public $isPrinted;
     public $levenshtein;
     public $levenprop;
 
-    function __construct ($type, &$dbConn, $oid = null, $recLevel = 0)
+    function __construct ($type, GraphDBProtocol &$dbConn, $oid = null, $recLevel = 0)
     {
 
         if ($oid == null) {
@@ -36,7 +39,7 @@ class RDFObject
         $this->levenshtein = 100;
     }
 
-    function getByOid ($type, &$dbConn, $oid, $recLevel)
+    function getByOid ($type, GraphDBProtocol &$dbConn, $oid, $recLevel)
     {
 
         $this->dbConn = $dbConn;
@@ -175,6 +178,9 @@ class RDFObject
             if (count($this->relations) > 0) {
                 foreach ($this->relations as $oid => $addRelation) {
                     foreach ($addRelation as $type => $object) {
+                        /**
+                         * @var $object RDFObject
+                         */
                         if ($object->isNew()) {
                             $object->write_to_db();
                             $oid = $object->getOid();
@@ -207,6 +213,9 @@ class RDFObject
             if (count($this->newRelations) > 0) {
                 foreach ($this->newRelations as $oid => $addRelation) {
                     foreach ($addRelation as $type => $object) {
+                        /**
+                         * @var $object RDFObject
+                         */
                         if ($object->isNew()) {
                             $object->write_to_db();
                             $oid = $object->getOid();
@@ -265,6 +274,9 @@ class RDFObject
             if (count($this->newRelations) > 0) {
                 foreach ($this->newRelations as $oid => $addRelation) {
                     foreach ($addRelation as $type => $object) {
+                        /**
+                         * @var $object RDFObject
+                         */
                         if ($object->isNew()) {
                             $object->write_to_db();
                             $oid = $object->getOid();

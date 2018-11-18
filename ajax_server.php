@@ -10,6 +10,9 @@ if (isset($_POST)) {
 
         try {
 
+            /**
+             * @var $dbConn GraphDBProtocol
+             */
             $dbConn = new RDFODBCConn();
             $RDFMed = new RDFMediator($dbConn);
             if ($_POST['action'] == 'searchObjectsForGraph' && isset($_POST['searchstring'])) {
