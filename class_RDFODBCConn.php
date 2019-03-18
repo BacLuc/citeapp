@@ -10,22 +10,10 @@ class RDFODBCConn implements GraphDBProtocol
 
     function __construct ()
     {
-
-        $conn = odbc_connect('VOS', 'dba', 'dba');
-
-        if ($this->isODBCError($conn)) {
-            throw new Exception("ODBC Connection Fehlgeschlagen. Code: " . odbc_error() . " 
-				Message: " . odbc_errormsg() . " File: " . __FILE__ . " Line: " . __LINE__, 0);
-
-        }
+        $conn = new PDO('odbc:VOS', 'dba', 'dba');
         $this->conn = $conn;
 
 
-    }
-
-    function __destruct ()
-    {
-        odbc_close_all();
     }
 
     private function getOid ()
@@ -38,28 +26,28 @@ class RDFODBCConn implements GraphDBProtocol
             $sparql = 'SELECT ?c FROM <' . __MYURL__ . '> WHERE {<' . __MYURL__ . '>  <' . __MYURL__
                       . '/voc.html#locked>  ?c } ';
 
-            $result = odbc_exec($this->conn, 'CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
-            $locked = odbc_num_rows($result) == - 1 ? 0 : 1;
+            $result = $this->$this->conn->query('CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
+            $locked = $result->rowCount() == - 1 ? 0 : 1;
         } while ($locked == 1);
 
         $sparql = 'INSERT INTO <' . __MYURL__ . '> {<' . __MYURL__ . '>  <' . __MYURL__ . '/voc.html#locked>  "1" } ';
-        $result = odbc_exec($this->conn, 'CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
-        if ($this->isODBCError($this->conn)) {
-            throw new Exception("ODBC Operation Fehlgeschlagen. Code: " . odbc_error($this->conn) . " 
-				Message: " . odbc_errormsg($this->conn) . " File: " . __FILE__ . " Line: " . __LINE__, 1);
+        $result = $this->$this->conn->query('CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
+        if ($this->isODBCError()) {
+            throw new Exception("ODBC Operation Fehlgeschlagen. Code: " . $this->conn->errorCode() . " 
+				Message: " . $this->conn->errorInfo() . " File: " . __FILE__ . " Line: " . __LINE__, 1);
 
         }
 
 
         $sparql = 'SELECT ?c FROM <' . __MYURL__ . '> WHERE {<' . __MYURL__ . '>  <' . __MYURL__
                   . '/voc.html#currentOid>  ?c } ';
-        $result = odbc_exec($this->conn, 'CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
-        if ($this->isODBCError($this->conn)) {
-            throw new Exception("ODBC Operation Fehlgeschlagen. Code: " . odbc_error($this->conn) . " 
-				Message: " . odbc_errormsg($this->conn) . " File: " . __FILE__ . " Line: " . __LINE__, 1);
+        $result = $this->$this->conn->query('CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
+        if ($this->isODBCError()) {
+            throw new Exception("ODBC Operation Fehlgeschlagen. Code: " . $this->conn->errorCode() . " 
+				Message: " . $this->conn->errorInfo() . " File: " . __FILE__ . " Line: " . __LINE__, 1);
 
         }
-        $row = odbc_fetch_array($result);
+        $row = $result->fetch();
         $currentOid = $row['c'];
 
         $sparql = '
@@ -70,10 +58,10 @@ class RDFODBCConn implements GraphDBProtocol
                   . ++ $currentOid . '" }
 
 		DELETE FROM GRAPH <' . __MYURL__ . '> {<' . __MYURL__ . '>  <' . __MYURL__ . '/voc.html#locked>  "1" }';
-        $result = odbc_exec($this->conn, 'CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
-        if ($this->isODBCError($this->conn)) {
-            throw new Exception("ODBC Operation Fehlgeschlagen. Code: " . odbc_error($this->conn) . " 
-				Message: " . odbc_errormsg($this->conn) . " File: " . __FILE__ . " Line: " . __LINE__, 1);
+        $result = $this->$this->conn->query('CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
+        if ($this->isODBCError()) {
+            throw new Exception("ODBC Operation Fehlgeschlagen. Code: " . $this->conn->errorCode() . " 
+				Message: " . $this->conn->errorInfo() . " File: " . __FILE__ . " Line: " . __LINE__, 1);
 
         }
 
@@ -87,18 +75,18 @@ class RDFODBCConn implements GraphDBProtocol
         $sparql = 'select ?a ?b ?c FROM <' . __MYURL__ . '> WHERE{ {<' . __MYURL__ . '/instances.php?oid=' . $oid
                   . '> ?b ?c} UNION{ ?a ?b <' . __MYURL__ . '/instances.php?oid=' . $oid . '>}}';
 
-        $result = odbc_exec($this->conn, 'CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
-        if ($this->isODBCError($this->conn)) {
+        $result = $this->conn->query('CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
+        if ($this->isODBCError()) {
 
-            throw new Exception("ODBC Operation Fehlgeschlagen. Code: " . odbc_error($this->conn) . " 
-				Message: " . odbc_errormsg($this->conn) . " File: " . __FILE__ . " Line: " . __LINE__, 1);
+            throw new Exception("ODBC Operation Fehlgeschlagen. Code: " . $this->conn->errorCode() . " 
+				Message: " . $this->conn->errorInfo() . " File: " . __FILE__ . " Line: " . __LINE__, 1);
 
         }
         $properties = null;
         $relations = null;
         $type = null;
-        if (odbc_num_rows($result) !== 0) {
-            while ($row = odbc_fetch_array($result)) {
+        if ($result->rowCount() !== 0) {
+            while ($row = $result->fetch()) {
 
 
                 if (!isset($row['c'])) {
@@ -182,10 +170,10 @@ class RDFODBCConn implements GraphDBProtocol
 		{<' . __MYURL__ . '/instances.php?oid=' . $currentOid . '>  <ca:hasOid>  "' . $currentOid . '".
 		<' . __MYURL__ . '/instances.php?oid=' . $currentOid . '>  <rdf:instanceOf>  "' . $object->getType() . '" }';
 
-        $result = odbc_exec($this->conn, 'CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
-        if ($this->isODBCError($this->conn)) {
-            throw new Exception("ODBC Operation Fehlgeschlagen. Code: " . odbc_error($this->conn) . " 
-				Message: " . odbc_errormsg($this->conn) . " File: " . __FILE__ . " Line: " . __LINE__, 1);
+        $result = $this->conn->query('CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
+        if ($this->isODBCError()) {
+            throw new Exception("ODBC Operation Fehlgeschlagen. Code: " . $this->conn->errorCode() . " 
+				Message: " . $this->conn->errorInfo() . " File: " . __FILE__ . " Line: " . __LINE__, 1);
 
         }
 
@@ -202,10 +190,10 @@ class RDFODBCConn implements GraphDBProtocol
         $sparql = 'INSERT INTO <' . __MYURL__ . '> 
 		{<' . __MYURL__ . '/instances.php?oid=' . $oid . '>  <' . $type . '>  "' . $addPropertie . '" }';
 
-        $result = odbc_exec($this->conn, 'CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
-        if ($this->isODBCError($this->conn)) {
-            throw new Exception("ODBC Operation Fehlgeschlagen. Code: " . odbc_error($this->conn) . " 
-				Message: " . odbc_errormsg($this->conn) . " File: " . __FILE__ . " Line: " . __LINE__, 1);
+        $result = $this->conn->query('CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
+        if ($this->isODBCError()) {
+            throw new Exception("ODBC Operation Fehlgeschlagen. Code: " . $this->conn->errorCode() . " 
+				Message: " . $this->conn->errorInfo() . " File: " . __FILE__ . " Line: " . __LINE__, 1);
 
         }
     }
@@ -216,10 +204,10 @@ class RDFODBCConn implements GraphDBProtocol
         $sparql = 'INSERT INTO <' . __MYURL__ . '> 
 		{<' . __MYURL__ . '/instances.php?oid=' . $from_oid . '>  <' . $type . '>  <' . __MYURL__
                   . '/instances.php?oid=' . $to_oid . '>  }';
-        $result = odbc_exec($this->conn, 'CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
-        if ($this->isODBCError($this->conn)) {
-            throw new Exception("ODBC Operation Fehlgeschlagen. Code: " . odbc_error($this->conn) . " 
-				Message: " . odbc_errormsg($this->conn) . " File: " . __FILE__ . " Line: " . __LINE__, 1);
+        $result = $this->conn->query('CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
+        if ($this->isODBCError()) {
+            throw new Exception("ODBC Operation Fehlgeschlagen. Code: " . $this->conn->errorCode() . " 
+				Message: " . $this->conn->errorInfo() . " File: " . __FILE__ . " Line: " . __LINE__, 1);
 
         }
     }
@@ -248,11 +236,11 @@ class RDFODBCConn implements GraphDBProtocol
 
         }
 
-        $result = odbc_exec($this->conn, 'CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
-        if ($this->isODBCError($this->conn)) {
-            echo odbc_errormsg($this->conn);
-            throw new Exception("ODBC Operation Fehlgeschlagen. Code: " . odbc_error($this->conn) . " 
-				Message: " . odbc_errormsg($this->conn) . " File: " . __FILE__ . " Line: " . __LINE__, 1);
+        $result = $this->conn->query('CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
+        if ($this->isODBCError()) {
+            echo $this->conn->errorInfo();
+            throw new Exception("ODBC Operation Fehlgeschlagen. Code: " . $this->conn->errorCode() . " 
+				Message: " . $this->conn->errorInfo() . " File: " . __FILE__ . " Line: " . __LINE__, 1);
 
         }
 
@@ -266,7 +254,7 @@ class RDFODBCConn implements GraphDBProtocol
         //echo odbc_num_rows($result);
         //if(odbc_num_rows($result) > 0){
 
-        while ($row = odbc_fetch_array($result)) {
+        while ($row = $result->fetch()) {
 
             if ($currentObjectOid == null) {
                 $currentObjectOid = $row['a'];
@@ -337,15 +325,15 @@ class RDFODBCConn implements GraphDBProtocol
     {
         $sparql = 'SELECT DISTINCT ?c FROM <' . __MYURL__ . '> WHERE {?a <rdf:instanceOf> ?c.FILTER(?c LIKE "%'
                   . $searchString . '%")}';
-        $result = odbc_exec($this->conn, 'CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
+        $result = $this->conn->query('CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
 
-        if ($this->isODBCError($this->conn)) {
-            throw new Exception("ODBC Operation Fehlgeschlagen. Code: " . odbc_error($this->conn) . " 
-			Message: " . odbc_errormsg($this->conn) . " File: " . __FILE__ . " Line: " . __LINE__, 1);
+        if ($this->isODBCError()) {
+            throw new Exception("ODBC Operation Fehlgeschlagen. Code: " . $this->conn->errorCode() . " 
+			Message: " . $this->conn->errorInfo() . " File: " . __FILE__ . " Line: " . __LINE__, 1);
 
         }
         $resultArray = array();
-        while ($row = odbc_fetch_array($result)) {
+        while ($row = $result->fetch()) {
             $explode = explode('#', $row['c']);
             $label = $row['c'];
             if (count($explode) > 1 && count($explode) <= 2) {
@@ -379,15 +367,15 @@ class RDFODBCConn implements GraphDBProtocol
         $sparql = 'SELECT DISTINCT ?c FROM <' . __MYURL__
                   . '> WHERE {?a ?c ?b.FILTER( (?a LIKE "%oid%") && (?c LIKE "http://citeapp.ch/voc.html#%'
                   . $searchString . '%" || ?c LIKE "%' . $searchString . '%") && !(?b LIKE "%oid%")) }';
-        $result = odbc_exec($this->conn, 'CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
+        $result = $this->conn->query('CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
 
-        if ($this->isODBCError($this->conn)) {
-            throw new Exception("ODBC Operation Fehlgeschlagen. Code: " . odbc_error($this->conn) . " 
-			Message: " . odbc_errormsg($this->conn) . " File: " . __FILE__ . " Line: " . __LINE__, 1);
+        if ($this->isODBCError()) {
+            throw new Exception("ODBC Operation Fehlgeschlagen. Code: " . $this->conn->errorCode() . " 
+			Message: " . $this->conn->errorInfo() . " File: " . __FILE__ . " Line: " . __LINE__, 1);
 
         }
         $resultArray = array();
-        while ($row = odbc_fetch_array($result)) {
+        while ($row = $result->fetch()) {
             if ($row['c'] == "ca:hasOid" || !(strpos($row['c'], "instance") === false)) {
                 continue;
             }
@@ -426,15 +414,15 @@ class RDFODBCConn implements GraphDBProtocol
 
         $sparql = 'SELECT DISTINCT ?c FROM <' . __MYURL__ . '> WHERE {?a ?c ?b.FILTER( (?a LIKE "%oid%") && (?c LIKE "%'
                   . $searchString . '%") && (?b LIKE "%oid%")) }';
-        $result = odbc_exec($this->conn, 'CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
+        $result = $this->conn->query('CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
         //echo $sparql;
-        if ($this->isODBCError($this->conn)) {
-            throw new Exception("ODBC Operation Fehlgeschlagen. Code: " . odbc_error($this->conn) . " 
-			Message: " . odbc_errormsg($this->conn) . " File: " . __FILE__ . " Line: " . __LINE__, 1);
+        if ($this->isODBCError()) {
+            throw new Exception("ODBC Operation Fehlgeschlagen. Code: " . $this->conn->errorCode() . " 
+			Message: " . $this->conn->errorInfo() . " File: " . __FILE__ . " Line: " . __LINE__, 1);
 
         }
         $resultArray = array();
-        while ($row = odbc_fetch_array($result)) {
+        while ($row = $result->fetch()) {
             $explode = explode('#', $row['c']);
             $label = $row['c'];
             if (count($explode) > 1 && count($explode) <= 2) {
@@ -468,10 +456,10 @@ class RDFODBCConn implements GraphDBProtocol
         $sparql =
             'DELETE FROM <' . __MYURL__ . '>  { <' . __MYURL__ . '/instances.php?oid=' . $oid . '> <' . $RemovePropertie
             . '> "' . $value . '" } ';
-        $result = odbc_exec($this->conn, 'CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
-        if ($this->isODBCError($this->conn)) {
-            throw new Exception("ODBC Operation Fehlgeschlagen. Code: " . odbc_error($this->conn) . " 
-			Message: " . odbc_errormsg($this->conn) . " File: " . __FILE__ . " Line: " . __LINE__, 1);
+        $result = $this->$this->conn->query('CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
+        if ($this->isODBCError()) {
+            throw new Exception("ODBC Operation Fehlgeschlagen. Code: " . $this->conn->errorCode() . " 
+			Message: " . $this->conn->errorInfo() . " File: " . __FILE__ . " Line: " . __LINE__, 1);
 
         }
 
@@ -483,10 +471,10 @@ class RDFODBCConn implements GraphDBProtocol
             'DELETE FROM <' . __MYURL__ . '>  { <' . __MYURL__ . '/instances.php?oid=' . $oid . '> <' . $type . '> <'
             . __MYURL__ . '/instances.php?oid=' . $other_oid . '> } ';
 
-        $result = odbc_exec($this->conn, 'CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
-        if ($this->isODBCError($this->conn)) {
-            throw new Exception("ODBC Operation Fehlgeschlagen. Code: " . odbc_error($this->conn) . " 
-			Message: " . odbc_errormsg($this->conn) . " File: " . __FILE__ . " Line: " . __LINE__, 1);
+        $result = $this->conn->query('CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
+        if ($this->isODBCError()) {
+            throw new Exception("ODBC Operation Fehlgeschlagen. Code: " . $this->conn->errorCode() . " 
+			Message: " . $this->conn->errorInfo() . " File: " . __FILE__ . " Line: " . __LINE__, 1);
 
         }
     }
@@ -502,22 +490,21 @@ class RDFODBCConn implements GraphDBProtocol
 		
 		';
 
-        $result = odbc_exec($this->conn, 'CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
-        if ($this->isODBCError($this->conn)) {
-            throw new Exception("ODBC Operation Fehlgeschlagen. Code: " . odbc_error($this->conn) . " 
-				Message: " . odbc_errormsg($this->conn) . " File: " . __FILE__ . " Line: " . __LINE__, 1);
+        $result = $this->conn->query('CALL DB.DBA.SPARQL_EVAL(\'' . $sparql . '\', NULL, 0)');
+        if ($this->isODBCError()) {
+            throw new Exception("ODBC Operation Fehlgeschlagen. Code: " . $this->conn->errorCode() . " 
+				Message: " . $this->conn->errorInfo() . " File: " . __FILE__ . " Line: " . __LINE__, 1);
 
         }
 
     }
 
     /**
-     * @param $conn
      * @return bool
      */
-    private function isODBCError ($conn)
+    private function isODBCError ()
     {
-        return odbc_error($conn) != "";
+        return $this->conn->errorCode() != "00000";
     }
 
 }
